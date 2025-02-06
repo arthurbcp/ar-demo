@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>AR com Vídeo e A-Frame</title>
+    <!-- Biblioteca A-Frame -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Biblioteca AR.js para A-Frame -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Cena com AR ativado -->
+    <a-scene embedded arjs="sourceType: webcam;">
+      <!-- Carrega o vídeo como asset -->
+      <a-assets>
+        <!-- Atenção: alguns navegadores (especialmente em mobile) exigem que o vídeo seja iniciado com interação do usuário -->
+        <video
+          id="my-video"
+          src="https://github.com/user-attachments/assets/b40c772b-9c20-46ec-be57-e8f4d93d7144"
+          crossorigin="anonymous"
+          playsinline
+        ></video>
+      </a-assets>
+
+      <!-- Define o marcador. Use o seu arquivo .patt gerado a partir da foto -->
+      <a-marker type="pattern" url="./marker.patt">
+        <!-- Exibe o vídeo como uma "tela" 3D (plano) posicionado sobre o marcador -->
+        <a-video
+          src="#my-video"
+          width="4"
+          height="2.25"
+          position="0 0 0"
+        ></a-video>
+      </a-marker>
+
+      <!-- Câmera necessária para a cena AR -->
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Script para controlar a reprodução do vídeo -->
+    <script>
+      // Seleciona o marcador e o vídeo
+      const marker = document.querySelector('a-marker');
+      const videoEl = document.querySelector('#my-video');
+
+      // Quando o marcador for detectado, reproduz o vídeo
+      marker.addEventListener('markerFound', () => {
+        console.log('Marcador encontrado!');
+        // Inicia o vídeo se ainda não estiver sendo reproduzido
+        if (videoEl.paused) {
+          videoEl.play().catch((err) => {
+            console.log('Erro ao tentar reproduzir o vídeo:', err);
+          });
+        }
+      });
+
+      // Quando o marcador deixar de ser detectado, pausa o vídeo
+      marker.addEventListener('markerLost', () => {
+        console.log('Marcador perdido!');
+        videoEl.pause();
+      });
+    </script>
+  </body>
+</html>
