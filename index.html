@@ -1,70 +1,53 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <title>AR com Vídeo e A-Frame</title>
-    <!-- Biblioteca A-Frame -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <!-- Biblioteca AR.js para A-Frame -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Cena com AR ativado -->
-    <a-scene embedded arjs="sourceType: webcam;">
-      <!-- Carrega o vídeo como asset -->
-      <a-assets>
-        <!-- Atenção: alguns navegadores (especialmente em mobile) exigem que o vídeo seja iniciado com interação do usuário -->
-        <video
-          id="my-video"
-          src="./video.mp4"
-          crossorigin="anonymous"
-          playsinline
-        ></video>
-      </a-assets>
-
-      <!-- Define o marcador. Use o seu arquivo .patt gerado a partir da foto -->
-      <a-marker type="pattern" url="./marker.patt">
-        <!-- Exibe o vídeo como uma "tela" 3D (plano) posicionado sobre o marcador -->
-        <a-video
-          src="#my-video"
-          width="4"
-          height="2.25"
-          position="0 0 0"
-        ></a-video>
-      </a-marker>
-
-      <!-- Câmera necessária para a cena AR -->
-      <a-entity camera></a-entity>
-    </a-scene>
-
-    <!-- Script para controlar a reprodução do vídeo -->
+<html>
+<head>
+    <title>AR Demo</title>
+    <script src="https://aframe.io/releases/0.6.1/aframe.min.js"></script>
+    <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <script>
-      // Seleciona o marcador e o vídeo
-      const marker = document.querySelector('a-marker');
-      const videoEl = document.querySelector('#my-video');
+        // We're going to register a custom event listener through a-frame that will fire
+        // whenever a marker has entered the camera view and is found through ar.js
+        AFRAME.registerComponent('registerevents', {
+            init: function() {
+                var marker = this.el;
 
-      // Quando o marcador for detectado, reproduz o vídeo
-      marker.addEventListener('markerFound', () => {
-        console.log('Marcador encontrado!');
-        // Inicia o vídeo se ainda não estiver sendo reproduzido
-        if (videoEl.paused) {
-          videoEl.play().catch((err) => {
-            console.log('Erro ao tentar reproduzir o vídeo:', err);
-          });
-        }
-      });
+                // Element emits events when found and lost
+                marker.setAttribute('emitevents', 'true');
 
-      // Quando o marcador deixar de ser detectado, pausa o vídeo
-      marker.addEventListener('markerLost', () => {
-        console.log('Marcador perdido!');
-        videoEl.pause();
-      });
+                marker.addEventListener('markerFound', function() {
+                    // Alright, a marker has been found. Let's get the video element
+                    var vid = document.getElementById('waterVideo');
+
+                    // Make sure that the video a-frame object is visible
+                    document.querySelector('#water').setAttribute('visible', true);
+
+                    // Reset the video to the beginning and play it through
+                    vid.currentTime = 0;                    
+                    vid.play();
+                    
+                    // Once the video has completed, we're going to hide the a-video element
+                    // which will display the a-image element with the watch behind it
+                    vid.addEventListener('ended', function(e) {
+                        document.querySelector('#water').setAttribute('visible', false);
+                    });
+                });
+            }
+        });
     </script>
-  </body>
+</head>
+<body style="margin:0; overflow:hidden;">
+    <a-scene embedded arjs="" artoolkit="">
+        <a-assets timeout="10000">
+            <img id="watchImage" src="/image.jpeg"z>
+            <video id="waterVideo" loop="false" autoplay="false" src="/video.mp4" preload="auto"></video>
+        </a-assets>
+        <a-marker preset="hiro" registerevents>
+            <a-image id="watch" src="#watchImage" height="2" width="1" position="0 1 0"></a-image>
+            <a-video id="water" src="#waterVideo" height="2" width="1" position="0 1 0" autoplay="false"></a-video>
+        </a-marker>
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
 </html>
