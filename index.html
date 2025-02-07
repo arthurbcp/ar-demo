@@ -7,6 +7,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body style="margin: 0; overflow: hidden;">
+    <button id="start-button" style="position: absolute; top: 10px; left: 10px; z-index: 1000;">
+        Iniciar AR
+    </button>
     <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
         <!-- NFT Marker -->
         <a-marker type="barcode" value="28">
@@ -27,5 +30,12 @@
         <!-- Câmera -->
         <a-entity camera></a-entity>
     </a-scene>
+    <script>
+        document.getElementById('start-button').addEventListener('click', () => {
+            const video = document.querySelector('a-video');
+            video.play(); // Inicia o vídeo
+            document.getElementById('start-button').style.display = 'none'; // Oculta o botão
+        });
+    </script>
 </body>
 </html>
